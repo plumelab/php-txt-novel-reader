@@ -555,7 +555,6 @@ if ($currentFolder !== 'all') {
 
     <main class="app-content">
         <section class="hint-card">
-            <div>💡 将 <code>.txt</code> 文件放入服务器的 <code>incoming/</code> 目录，刷新本页面即可自动导入。</div>
             <?php if ($imported > 0): ?>
                 <div style="margin-top:8px;">✅ 本次已导入：<?=$imported?> 本</div>
             <?php endif; ?>
