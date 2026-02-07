@@ -15,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $apiKey = trim((string)($_POST['openai_api_key'] ?? ''));
     $adminPassword = trim((string)($_POST['admin_password'] ?? ''));
 
-    if ($apiKey === '' || $adminPassword === '') {
-        $error = '请填写 OpenAI 兼容 Key 与管理员密码。';
+    if ($adminPassword === '') {
+        $error = '请填写管理员密码。';
     } else {
         $config = [
             'OPENAI_API_KEY' => $apiKey,
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="login-page">
 <div class="login-card">
     <h2>首次初始化</h2>
-    <p>请填写 OpenAI 兼容 Key 与管理员密码后继续使用。</p>
+    <p>请设置管理员密码后继续使用（OpenAI 兼容 Key 可选）。</p>
     <p class="notice-row notice-warning">提示：原生运行环境为 PHP 8，并确保项目目录具备读写权限。</p>
 
     <?php if ($error !== ''): ?>
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form method="post" class="login-form">
-        <input type="text" name="openai_api_key" placeholder="输入 OpenAI 兼容 Key" required>
+        <input type="text" name="openai_api_key" placeholder="输入 OpenAI 兼容 Key（可选）">
         <input type="password" name="admin_password" placeholder="设置管理员密码" required>
         <button type="submit">保存并继续</button>
     </form>
