@@ -18,7 +18,9 @@ const titleEl         = document.getElementById('chapter-title');
 const contentEl       = document.getElementById('chapter-content');
 const readerMain      = document.getElementById('reader-main');
 const innerEl         = document.getElementById('reader-main-inner');
-const chapterSearchEl = document.getElementById('chapter-search');
+const chapterRangeListEl = document.getElementById('chapter-range-list');
+const chapterRangeTitleEl = document.getElementById('chapter-range-title');
+const chapterRangeBackEl = document.getElementById('chapter-range-back');
 const chapterListEl   = document.getElementById('chapter-list');
 const chapterListEmptyEl = document.getElementById('chapter-list-empty');
 const rootEl          = document.documentElement;
@@ -45,6 +47,10 @@ const aiClearBtnEl       = document.getElementById('ai-clear');
 const aiErrorEl          = document.getElementById('ai-error');
 
 let chapterList = [];
+let currentRangeIndex = null;
+let chapterListLoading = false;
+
+const CHAPTERS_PER_RANGE = 50;
 
 // ===== Toast =====
 let toastEl = null;
@@ -526,6 +532,88 @@ function updateChapterListSelection() {
         const idx = parseInt(btn.dataset.index || '0', 10);
         btn.classList.toggle('active', idx === currentChapterIndex);
     });
+    if (chapterRangeListEl) {
+        const rangeItems = chapterRangeListEl.querySelectorAll('.chapter-range-item');
+        const currentRange = getRangeForChapterIndex(currentChapterIndex);
+        rangeItems.forEach(btn => {
+            const idx = parseInt(btn.dataset.range || '0', 10);
+            btn.classList.toggle('active', idx === currentRange);
+        });
+    }
+}
+
+function setChapterRangeMode(showRanges) {
+    if (chapterRangeListEl) {
+        chapterRangeListEl.style.display = showRanges ? 'flex' : 'none';
+    }
+    if (chapterListEl) {
+        chapterListEl.style.display = showRanges ? 'none' : 'flex';
+    }
+    if (chapterRangeBackEl) {
+        chapterRangeBackEl.style.display = showRanges ? 'none' : 'inline-flex';
+    }
+}
+
+function getRangeCount() {
+    if (!chapterList.length) return 0;
+    return Math.ceil(chapterList.length / CHAPTERS_PER_RANGE);
+}
+
+function getRangeForChapterIndex(index) {
+    if (index < 0) return 0;
+    return Math.floor(index / CHAPTERS_PER_RANGE);
+}
+
+function getRangeLabel(rangeIndex) {
+    const start = rangeIndex * CHAPTERS_PER_RANGE + 1;
+    const end = Math.min(chapterList.length, (rangeIndex + 1) * CHAPTERS_PER_RANGE);
+    return `第 ${start}-${end} 章`;
+}
+
+function renderChapterRanges() {
+    if (!chapterRangeListEl) return;
+    chapterRangeListEl.innerHTML = '';
+
+    if (!chapterList.length) {
+        const emptyText = chapterListLoading ? '正在加载章节列表…' : '暂无章节';
+        setChapterListEmpty(emptyText, true);
+        return;
+    }
+
+    const rangeCount = getRangeCount();
+    if (!rangeCount) {
+        setChapterListEmpty('暂无章节', true);
+        return;
+    }
+
+    setChapterListEmpty('', false);
+    for (let i = 0; i < rangeCount; i++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'chapter-range-item';
+        btn.dataset.range = String(i);
+        btn.textContent = getRangeLabel(i);
+        if (i === getRangeForChapterIndex(currentChapterIndex)) {
+            btn.classList.add('active');
+        }
+        btn.addEventListener('click', () => {
+            openChapterRange(i);
+        });
+        chapterRangeListEl.appendChild(btn);
+    }
+    setChapterRangeMode(true);
+    if (chapterRangeTitleEl) {
+        chapterRangeTitleEl.textContent = '请选择章节范围';
+    }
+}
+
+function openChapterRange(rangeIndex) {
+    currentRangeIndex = rangeIndex;
+    renderChapterList();
+    setChapterRangeMode(false);
+    if (chapterRangeTitleEl) {
+        chapterRangeTitleEl.textContent = getRangeLabel(rangeIndex);
+    }
 }
 
 function renderChapterList() {
@@ -537,16 +625,13 @@ function renderChapterList() {
         return;
     }
 
-    const query = (chapterSearchEl ? chapterSearchEl.value : '').trim().toLowerCase();
-    const filtered = chapterList.filter(item => {
-        if (!query) return true;
-        const label = formatChapterLabel(item);
-        const hay = `${label.idx} ${label.title}`.toLowerCase();
-        return hay.includes(query);
-    });
+    const rangeIndex = (typeof currentRangeIndex === 'number') ? currentRangeIndex : 0;
+    const start = rangeIndex * CHAPTERS_PER_RANGE;
+    const end = Math.min(chapterList.length, (rangeIndex + 1) * CHAPTERS_PER_RANGE);
+    const filtered = chapterList.slice(start, end);
 
     if (!filtered.length) {
-        setChapterListEmpty('未找到匹配章节', true);
+        setChapterListEmpty('该范围暂无章节', true);
         return;
     }
 
@@ -571,6 +656,7 @@ function renderChapterList() {
 
 function loadChapterList() {
     if (!chapterListEl) return Promise.resolve();
+    chapterListLoading = true;
     setChapterListEmpty('正在加载章节列表…', true);
 
     return fetch(`chapter_list.php?book=${encodeURIComponent(BOOK_ID)}&_t=${Date.now()}`)
@@ -584,10 +670,12 @@ function loadChapterList() {
                 title: ch.title || ''
             }));
             if (data.total) totalChapters = data.total;
-            renderChapterList();
+            chapterListLoading = false;
+            renderChapterRanges();
         })
         .catch(err => {
             console.warn('loadChapterList error', err);
+            chapterListLoading = false;
             setChapterListEmpty('章节列表加载失败，请稍后再试。', true);
         });
 }
@@ -1094,15 +1182,17 @@ window.largerMargin = largerMargin;
 if (btnSettingsOpen) {
     btnSettingsOpen.addEventListener('click', (e) => {
         e.preventDefault();
-        renderChapterList();
+        renderChapterRanges();
         updateChapterListSelection();
         openModal(settingsModalEl);
     });
 }
 
-if (chapterSearchEl) {
-    chapterSearchEl.addEventListener('input', () => {
-        renderChapterList();
+if (chapterRangeBackEl) {
+    chapterRangeBackEl.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentRangeIndex = null;
+        renderChapterRanges();
         updateChapterListSelection();
     });
 }
