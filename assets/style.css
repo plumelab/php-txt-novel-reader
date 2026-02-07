@@ -176,6 +176,12 @@ body {
     background: rgba(239, 68, 68, 0.12);
 }
 
+.notice-warning {
+    color: #fde68a;
+    border-color: rgba(245, 158, 11, 0.55);
+    background: rgba(245, 158, 11, 0.12);
+}
+
 /* 书库列表 */
 .book-list {
     display: flex;

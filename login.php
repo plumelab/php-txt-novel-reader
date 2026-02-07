@@ -1,10 +1,17 @@
 <?php
 session_start();
 
-$PASSWORD = 'y0117x299823669c'; // 改成你自己的密码
+require_once __DIR__ . '/config.php';
+
+if (needs_initial_setup()) {
+    header('Location: init.php');
+    exit;
+}
+
+$PASSWORD = defined('ADMIN_PASSWORD') ? ADMIN_PASSWORD : '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!empty($_POST['password']) && $_POST['password'] === $PASSWORD) {
+    if ($PASSWORD !== '' && !empty($_POST['password']) && $_POST['password'] === $PASSWORD) {
         $_SESSION['admin'] = true;
         header('Location: index.php');
         exit;

@@ -1,6 +1,13 @@
 <?php
 session_start();
 
+require_once __DIR__ . '/config.php';
+
+if (needs_initial_setup()) {
+    header('Location: init.php');
+    exit;
+}
+
 $baseDir     = __DIR__;
 $incomingDir = $baseDir . '/incoming';
 $uploadDir   = $baseDir . '/uploads';
