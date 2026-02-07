@@ -8,6 +8,8 @@
 > The user interface is currently Chinese-only.
 
 ---
+![IMG_4186](https://github.com/user-attachments/assets/e42b8c73-fe3d-426f-85d8-29ebb97980b7)
+---
 
 ## 项目说明
 
