@@ -18,7 +18,11 @@ const titleEl         = document.getElementById('chapter-title');
 const contentEl       = document.getElementById('chapter-content');
 const readerMain      = document.getElementById('reader-main');
 const innerEl         = document.getElementById('reader-main-inner');
-const jumpInputEl     = document.getElementById('jump-input');
+const chapterMenuBtnEl = document.getElementById('btn-chapter-menu');
+const chapterMenuEl = document.getElementById('chapter-menu');
+const chapterRangeEl = document.getElementById('chapter-range');
+const chapterListEl = document.getElementById('chapter-list');
+const chapterListEmptyEl = document.getElementById('chapter-list-empty');
 const rootEl          = document.documentElement;
 const readerShellEl   = document.querySelector('.reader-shell');
 const progressBadgeEl = document.getElementById('reading-progress');
@@ -41,6 +45,9 @@ const aiUserInputEl      = document.getElementById('ai-user-input');
 const aiSendBtnEl        = document.getElementById('ai-send');
 const aiClearBtnEl       = document.getElementById('ai-clear');
 const aiErrorEl          = document.getElementById('ai-error');
+
+let chapterList = [];
+let chapterRangeSize = 50;
 
 // ===== Toast =====
 let toastEl = null;
@@ -93,6 +100,9 @@ function closeModal(modalEl) {
     if (!modalEl) return;
     modalEl.classList.remove('show');
     modalEl.setAttribute('aria-hidden', 'true');
+    if (modalEl === settingsModalEl) {
+        closeChapterMenu();
+    }
 }
 
 function closeAllModals() {
@@ -417,6 +427,7 @@ function renderPage(direction) {
 
     updateProgressUI();
     saveProgress();
+    updateChapterListSelection();
 
     // 动画
     if (!innerEl || !direction) return;
@@ -498,6 +509,133 @@ function loadChapterFromServer(chapterIndex, pageToOpen = 0, direction = 0) {
 }
 
 /* =============================
+   章节列表
+   ============================= */
+function setChapterListEmpty(message, show) {
+    if (!chapterListEmptyEl) return;
+    if (typeof message === 'string') {
+        chapterListEmptyEl.textContent = message;
+    }
+    chapterListEmptyEl.classList.toggle('show', !!show);
+}
+
+function formatChapterLabel(item) {
+    const idx = item.index + 1;
+    const title = item.title || ('第 ' + idx + ' 章');
+    return { idx, title };
+}
+
+function updateChapterListSelection() {
+    if (!chapterListEl) return;
+    const items = chapterListEl.querySelectorAll('.chapter-item');
+    items.forEach(btn => {
+        const idx = parseInt(btn.dataset.index || '0', 10);
+        btn.classList.toggle('active', idx === currentChapterIndex);
+    });
+}
+
+function buildChapterRanges(total) {
+    if (!chapterRangeEl) return;
+    chapterRangeEl.innerHTML = '';
+    if (!total) return;
+
+    for (let start = 1; start <= total; start += chapterRangeSize) {
+        const end = Math.min(total, start + chapterRangeSize - 1);
+        const opt = document.createElement('option');
+        opt.value = String(start);
+        opt.textContent = `${start}-${end} 章`;
+        chapterRangeEl.appendChild(opt);
+    }
+}
+
+function getCurrentRange() {
+    if (!chapterRangeEl) return { start: 1, end: chapterList.length };
+    const start = parseInt(chapterRangeEl.value || '1', 10) || 1;
+    const end = Math.min(chapterList.length, start + chapterRangeSize - 1);
+    return { start, end };
+}
+
+function renderChapterList() {
+    if (!chapterListEl) return;
+    chapterListEl.innerHTML = '';
+
+    if (!chapterList.length) {
+        setChapterListEmpty('暂无章节', true);
+        return;
+    }
+
+    const { start, end } = getCurrentRange();
+    const filtered = chapterList.filter(item => {
+        const idx = item.index + 1;
+        return idx >= start && idx <= end;
+    });
+
+    if (!filtered.length) {
+        setChapterListEmpty('当前范围没有章节', true);
+        return;
+    }
+
+    setChapterListEmpty('', false);
+    filtered.forEach(item => {
+        const label = formatChapterLabel(item);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'chapter-item';
+        btn.dataset.index = String(item.index);
+        btn.innerHTML = `<span class="chapter-item-index">#${label.idx}</span><span class="chapter-item-title">${escapeHTML(label.title)}</span>`;
+        btn.addEventListener('click', () => {
+            loadChapterFromServer(item.index, 0, 0);
+            closeModal(settingsModalEl);
+        });
+        if (item.index === currentChapterIndex) {
+            btn.classList.add('active');
+        }
+        chapterListEl.appendChild(btn);
+    });
+}
+
+function openChapterMenu() {
+    if (!chapterMenuEl) return;
+    chapterMenuEl.classList.add('show');
+    chapterMenuEl.setAttribute('aria-hidden', 'false');
+}
+
+function closeChapterMenu() {
+    if (!chapterMenuEl) return;
+    chapterMenuEl.classList.remove('show');
+    chapterMenuEl.setAttribute('aria-hidden', 'true');
+}
+
+function loadChapterList() {
+    if (!chapterListEl) return Promise.resolve();
+    setChapterListEmpty('正在加载章节列表…', true);
+
+    return fetch(`chapter_list.php?book=${encodeURIComponent(BOOK_ID)}&_t=${Date.now()}`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+            if (!data || !Array.isArray(data.chapters)) {
+                throw new Error('invalid_list');
+            }
+            chapterList = data.chapters.map(ch => ({
+                index: typeof ch.index === 'number' ? ch.index : 0,
+                title: ch.title || ''
+            }));
+            if (data.total) totalChapters = data.total;
+            buildChapterRanges(chapterList.length);
+            if (chapterRangeEl) {
+                const currentStart = Math.floor(currentChapterIndex / chapterRangeSize) * chapterRangeSize + 1;
+                chapterRangeEl.value = String(currentStart);
+            }
+            renderChapterList();
+            updateChapterListSelection();
+        })
+        .catch(err => {
+            console.warn('loadChapterList error', err);
+            setChapterListEmpty('章节列表加载失败，请稍后再试。', true);
+        });
+}
+
+/* =============================
    翻页 / 跳转
    ============================= */
 function prevPageOrChapter() {
@@ -527,17 +665,6 @@ function nextPageOrChapter() {
         const targetChapter = currentChapterIndex + 1;
         loadChapterFromServer(targetChapter, 0, 1);
     }
-}
-
-function jumpToChapter() {
-    if (!jumpInputEl) return;
-    const val = parseInt(jumpInputEl.value, 10);
-    if (isNaN(val)) return;
-    const idx = val - 1;
-    if (idx < 0) return;
-    if (totalChapters && idx >= totalChapters) return;
-    loadChapterFromServer(idx, 0, 0);
-    closeModal(settingsModalEl);
 }
 
 /* =============================
@@ -933,6 +1060,8 @@ function initReader() {
     loadReadingSettings();
     applyReadingSettings();
 
+    loadChapterList();
+
     // 默认先隐藏 UI，更沉浸
     setUIVisible(false, false);
 
@@ -996,7 +1125,6 @@ function largerMargin() {
 /* 暴露给 HTML 按钮 */
 window.prevPageOrChapter = prevPageOrChapter;
 window.nextPageOrChapter = nextPageOrChapter;
-window.jumpToChapter = jumpToChapter;
 
 window.smallerFont = smallerFont;
 window.largerFont = largerFont;
@@ -1009,7 +1137,32 @@ window.largerMargin = largerMargin;
 if (btnSettingsOpen) {
     btnSettingsOpen.addEventListener('click', (e) => {
         e.preventDefault();
+        if (chapterRangeEl && chapterList.length) {
+            const currentStart = Math.floor(currentChapterIndex / chapterRangeSize) * chapterRangeSize + 1;
+            chapterRangeEl.value = String(currentStart);
+        }
+        renderChapterList();
+        updateChapterListSelection();
         openModal(settingsModalEl);
+    });
+}
+
+if (chapterMenuBtnEl) {
+    chapterMenuBtnEl.addEventListener('click', () => {
+        if (!chapterMenuEl) return;
+        const isOpen = chapterMenuEl.classList.contains('show');
+        if (isOpen) {
+            closeChapterMenu();
+        } else {
+            openChapterMenu();
+        }
+    });
+}
+
+if (chapterRangeEl) {
+    chapterRangeEl.addEventListener('change', () => {
+        renderChapterList();
+        updateChapterListSelection();
     });
 }
 
