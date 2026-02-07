@@ -554,16 +554,6 @@ if ($currentFolder !== 'all') {
     </header>
 
     <main class="app-content">
-        <section class="hint-card">
-            <?php if ($imported > 0): ?>
-                <div style="margin-top:8px;">✅ 本次已导入：<?=$imported?> 本</div>
-            <?php endif; ?>
-            <?php if (!empty($uploadNotice)): ?>
-                <div class="notice-row <?=$uploadNotice['type'] === 'success' ? 'notice-success' : 'notice-error'?>">
-                    <?=htmlspecialchars($uploadNotice['text'])?>
-                </div>
-            <?php endif; ?>
-        </section>
 
         <!-- Folder tabs -->
         <nav class="folder-bar">
