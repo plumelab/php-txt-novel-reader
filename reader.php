@@ -109,11 +109,14 @@ if (!file_exists($jsonFile)) {
             </div>
 
             <div class="setting-row">
-                <div class="setting-label">跳到章节</div>
-                <div class="setting-controls jump-controls">
-                    <input type="number" id="jump-input" min="1" placeholder="例如：12">
-                    <button class="btn tiny primary" onclick="jumpToChapter()">跳转</button>
+                <div class="setting-label">章节选择</div>
+                <div class="setting-controls chapter-search-controls">
+                    <input type="search" id="chapter-search" placeholder="输入章节号或标题">
                 </div>
+            </div>
+            <div class="chapter-picker">
+                <div id="chapter-list" class="chapter-list" role="listbox" aria-label="章节列表"></div>
+                <div id="chapter-list-empty" class="chapter-list-empty">正在加载章节列表…</div>
             </div>
 
             <div class="setting-hint">
