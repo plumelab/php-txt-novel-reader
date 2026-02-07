@@ -121,6 +121,23 @@ body {
     font-size: 14px;
 }
 
+.header-link.admin-entry {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.16);
+    border: 1px solid rgba(59, 130, 246, 0.45);
+    color: #dbeafe;
+    font-weight: 600;
+}
+
+.header-link.admin-entry::before {
+    content: "🔐";
+    font-size: 14px;
+}
+
 /* 书库内容区域 */
 .app-content {
     padding: 12px;
@@ -137,6 +154,26 @@ body {
     font-size: 14px;
     margin-bottom: 12px;
     color: var(--muted);
+}
+
+.notice-row {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    border: 1px solid transparent;
+}
+
+.notice-success {
+    color: #bbf7d0;
+    border-color: rgba(34, 197, 94, 0.55);
+    background: rgba(34, 197, 94, 0.12);
+}
+
+.notice-error {
+    color: #fecaca;
+    border-color: rgba(239, 68, 68, 0.55);
+    background: rgba(239, 68, 68, 0.12);
 }
 
 /* 书库列表 */
@@ -172,6 +209,62 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+/* =============================
+   登录页
+   ============================= */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--page-bg);
+}
+
+.login-card {
+    width: min(420px, 100%);
+    background: var(--panel-bg-strong);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+}
+
+.login-card h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+}
+
+.login-card p {
+    margin: 0 0 16px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.login-form {
+    display: grid;
+    gap: 12px;
+}
+
+.login-form input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text);
+}
+
+.login-form button {
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 /* =============================
