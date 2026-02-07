@@ -118,6 +118,7 @@ function remove_empty_dirs(string $root): void {
 }
 
 $lib = read_library($libraryFile);
+$uploadNotice = null;
 
 // -----------------------------
 // Admin actions (folder ops / move book / rename book)
@@ -196,6 +197,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $isAdmin) {
         $redirectFolder = $_GET['folder'] ?? 'all';
         header('Location: index.php?folder=' . urlencode($redirectFolder));
         exit;
+    }
+
+    if ($action === 'upload_book') {
+        $uploadNotice = ['type' => 'error', 'text' => '上传失败，请重试。'];
+        if (!empty($_FILES['book_file']) && is_array($_FILES['book_file'])) {
+            $file = $_FILES['book_file'];
+            if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+                $origName = (string)($file['name'] ?? '');
+                $ext = strtolower(pathinfo($origName, PATHINFO_EXTENSION));
+                if ($ext === 'txt') {
+                    $baseName = pathinfo($origName, PATHINFO_FILENAME);
+                    $baseName = preg_replace('/[^\p{Han}A-Za-z0-9_\-\s]+/u', '_', $baseName);
+                    $baseName = safe_trim_fullwidth((string)$baseName);
+                    if ($baseName === '') $baseName = 'book';
+                    $targetName = $baseName . '.txt';
+                    $targetPath = $incomingDir . '/' . $targetName;
+                    if (file_exists($targetPath)) {
+                        $targetName = $baseName . '_' . date('Ymd_His') . '_' . mt_rand(100, 999) . '.txt';
+                        $targetPath = $incomingDir . '/' . $targetName;
+                    }
+                    if (move_uploaded_file($file['tmp_name'], $targetPath)) {
+                        $uploadNotice = ['type' => 'success', 'text' => '✅ 已上传到 incoming 文件夹，稍后将自动导入。'];
+                    } else {
+                        $uploadNotice = ['type' => 'error', 'text' => '上传失败，无法保存文件。'];
+                    }
+                } else {
+                    $uploadNotice = ['type' => 'error', 'text' => '仅支持上传 .txt 文件。'];
+                }
+            } else {
+                $uploadNotice = ['type' => 'error', 'text' => '上传失败，文件有误。'];
+            }
+        }
     }
 }
 
@@ -515,7 +548,7 @@ if ($currentFolder !== 'all') {
             <?php if ($isAdmin): ?>
                 <a href="logout.php" class="header-link">退出</a>
             <?php else: ?>
-                <a href="login.php" class="header-link">管理员</a>
+                <a href="login.php" class="header-link admin-entry">管理员登录</a>
             <?php endif; ?>
         </div>
     </header>
@@ -525,6 +558,11 @@ if ($currentFolder !== 'all') {
             <div>💡 将 <code>.txt</code> 文件放入服务器的 <code>incoming/</code> 目录，刷新本页面即可自动导入。</div>
             <?php if ($imported > 0): ?>
                 <div style="margin-top:8px;">✅ 本次已导入：<?=$imported?> 本</div>
+            <?php endif; ?>
+            <?php if (!empty($uploadNotice)): ?>
+                <div class="notice-row <?=$uploadNotice['type'] === 'success' ? 'notice-success' : 'notice-error'?>">
+                    <?=htmlspecialchars($uploadNotice['text'])?>
+                </div>
             <?php endif; ?>
         </section>
 
@@ -545,6 +583,16 @@ if ($currentFolder !== 'all') {
         </nav>
 
         <?php if ($isAdmin): ?>
+            <section class="folder-admin">
+                <div style="font-weight:700;margin-bottom:10px;">📤 上传图书</div>
+                <form class="inline-form" method="post" action="index.php" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="upload_book">
+                    <input type="file" name="book_file" accept=".txt" required>
+                    <button class="mini-btn" type="submit">上传到 incoming</button>
+                </form>
+                <div style="margin-top:10px;font-size:12px;color:rgba(242,242,242,.62);">仅支持 .txt 文件，上传后将自动导入到书库。</div>
+            </section>
+
             <section class="folder-admin">
                 <div style="font-weight:700;margin-bottom:10px;">🗂️ 文件夹管理</div>
 
