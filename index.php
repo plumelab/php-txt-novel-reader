@@ -376,9 +376,21 @@ if ($currentFolder !== 'all') {
         .folder-bar{
           display:flex !important;
           gap:10px !important;
-          flex-wrap:wrap !important;
+          flex-wrap:nowrap !important;
           margin:12px 0 !important;
           color: var(--ui-text) !important;
+          overflow-x:auto !important;
+          overflow-y:hidden !important;
+          padding-bottom:4px !important;
+          scrollbar-width: thin !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+        .folder-bar::-webkit-scrollbar{
+          height:6px !important;
+        }
+        .folder-bar::-webkit-scrollbar-thumb{
+          background: rgba(255,255,255,.18) !important;
+          border-radius:999px !important;
         }
         .folder-chip{
           display:inline-flex !important;
@@ -394,6 +406,8 @@ if ($currentFolder !== 'all') {
           letter-spacing:.2px !important;
           line-height:1 !important;
           user-select:none !important;
+          flex:0 0 auto !important;
+          white-space: nowrap !important;
         }
         .folder-chip::before{
           content:"📁" !important;
