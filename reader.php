@@ -155,7 +155,7 @@ if (!file_exists($jsonFile)) {
             <div class="ai-quick">
                 <button class="btn tiny secondary" type="button" data-ai-template="解释这段话的意思，并用更通俗的话复述。">解释</button>
                 <button class="btn tiny secondary" type="button" data-ai-template="帮我总结这段内容的要点（3-5条）。">总结</button>
-                <button class="btn tiny secondary" type="button" data-ai-template="你可以帮我翻译一下嘛，大意+你觉得比较有意思的点即可，我在阅读日语轻小说来学习日语。">翻译</button>
+                <button class="btn tiny secondary" type="button" data-ai-template="你可以帮我翻译一下嘛，大意+你觉得比较有意思的点即可。">翻译</button>
             </div>
 
             <div id="ai-chat-log" class="ai-chat-log"></div>
