@@ -50,6 +50,24 @@ function normalize_spaces(string $s): string {
     return $s;
 }
 
+function normalize_title_line(string $line): string {
+    $line = normalize_spaces($line);
+    if ($line === '') return $line;
+
+    if (preg_match('/(第[一二三四五六七八九十百千万零〇两0-9０-９]+[章节卷回节話话部幕集][^第\r\n]*)/u', $line, $m)) {
+        return normalize_spaces(trim($m[1]));
+    }
+
+    return $line;
+}
+
+function extract_chapter_key(string $title): ?string {
+    if (preg_match('/第([一二三四五六七八九十百千万零〇两0-9０-９]+)[章节卷回节話话部幕集]/u', $title, $m)) {
+        return $m[1];
+    }
+    return null;
+}
+
 function count_letters_no_space(string $s): int {
     $x = preg_replace('/\s+/u', '', $s);
     return mb_strlen($x, 'UTF-8');
@@ -316,7 +334,7 @@ function find_heading_pos(string $content, int $startPos, array $entry): ?array 
 
         if (preg_match($re, $tail, $m, PREG_OFFSET_CAPTURE)) {
             $pos = $startPos + $m[0][1];
-            $titleLine = normalize_spaces($m[0][0]);
+            $titleLine = normalize_title_line($m[0][0]);
             return ['pos'=>$pos, 'title'=>$titleLine, 'mode'=>$mode];
         }
     }
@@ -397,6 +415,7 @@ function detect_heads_generic(array $lineIndex, int $startPos): array {
     }
 
     $lastPos = -1;
+    $lastChapterKey = null;
     for ($i = $startIdx; $i < $n; $i++) {
         $line = $lineIndex[$i]['text'];
         if (!is_title_candidate_line($line)) continue;
@@ -409,8 +428,15 @@ function detect_heads_generic(array $lineIndex, int $startPos): array {
         $pos = $lineIndex[$i]['pos'];
         if ($lastPos >= 0 && ($pos - $lastPos) < 5) continue;
 
-        $heads[] = ['pos'=>$pos, 'title'=>normalize_spaces(trim($line))];
+        $title = normalize_title_line($line);
+        $chapterKey = extract_chapter_key($title);
+        if ($chapterKey !== null && $chapterKey === $lastChapterKey) {
+            continue;
+        }
+
+        $heads[] = ['pos'=>$pos, 'title'=>$title];
         $lastPos = $pos;
+        $lastChapterKey = $chapterKey;
     }
 
     return $heads;
