@@ -1,25 +1,23 @@
 # php-txt-novel-reader
 
 一个 **纯 PHP 的 txt 小说网页书库 + 阅读器**。  
-主要为个人自用设计，同时也可以部署为一个轻量级的小说阅读站点。
+主要为个人自用设计，也可以部署为一个轻量级的小说阅读站点。
 
-A **pure PHP web-based txt novel library and reader**.  
-Originally designed for personal use, but can also be deployed as a lightweight novel reading website.
+> A lightweight PHP-based txt novel library and reader,  
+> designed primarily for personal use.  
+> The user interface is currently Chinese-only.
 
 ---
 
-## 项目说明 | About
+## 项目说明
 
 - 本项目以 **简单、可用** 为目标  
 - 不追求复杂架构，也不保证高性能或高安全性  
 - 更适合作为个人阅读工具或参考实现
 
-This project focuses on **simplicity and practicality**.  
-It does **not** aim for high performance or enterprise-level security, and is best suited for personal use or as a reference project.
-
 ---
 
-## 技术特点 | Features
+## 技术特点
 
 - 纯 PHP 实现（无框架）
 - 使用 txt + json 存储（无需数据库）
@@ -29,45 +27,31 @@ It does **not** aim for high performance or enterprise-level security, and is be
 - 阅读进度记录
 - 阅读器界面（支持夜间模式、字体等基础设置）
 - 移动端可用（基础响应式）
-- 简单的 AI 问答功能（实验性）
-
-Pure PHP, no framework  
-Txt + JSON storage, no database required  
-File write permission required  
-Basic chapter parsing (accuracy not guaranteed)  
-Bookshelf and reading progress support  
-Reader UI with basic settings (night mode, font size, etc.)  
-Mobile-friendly layout  
-Simple AI Q&A feature (experimental)  
+- 简单的 AI 问答功能（实验性，可选）
 
 ---
 
-## 使用说明 | Usage
+## 部署方式
 
-1. 将项目部署到支持 PHP 的 Web 环境  
-2. 确保相关目录具有写权限  
-3. 将 txt 小说文件放入指定目录  
-4. 通过浏览器访问即可使用
+1. 下载或克隆本项目  
+2. 将项目解压到支持 PHP 的 Web 根目录  
+3. 确保项目目录具备读写权限  
+4. 通过浏览器访问站点，按提示完成首次初始化
 
-1. Deploy the project to a PHP-enabled web server  
-2. Make sure required directories are writable  
-3. Put txt novel files into the specified directory  
-4. Open it in your browser
+无需数据库或额外依赖。  
+项目体积约 **100KB**，适合个人使用或内网部署。
 
-> 本项目在 PHP 8 环境下测试通过，理论上不依赖特定 PHP 版本，但未做严格版本兼容测试。  
-> Tested under PHP 8. Other versions may work but are not guaranteed.
+> 本项目在 PHP 8 环境下测试通过，  
+> 理论上不依赖特定 PHP 版本，但未做严格的版本兼容测试。
 
 ---
 
-## 注意事项 | Notes
+## 注意事项
 
 - 本项目主要为个人使用而设计
 - 不保证性能、安全性或章节解析准确性
-- 请自行评估是否适合用于公开环境
-
-This project is primarily intended for personal use.  
-Performance, security, and chapter parsing accuracy are **not guaranteed**.  
-Use it at your own discretion, especially in public environments.
+- AI 相关功能依赖第三方服务，是否使用由用户自行决定
+- 请自行评估是否适合部署在公开网络环境中
 
 ---
 
