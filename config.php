@@ -38,5 +38,5 @@ function needs_initial_setup(): bool {
     $apiKey = trim((string)($data['OPENAI_API_KEY'] ?? ''));
     $adminPassword = trim((string)($data['ADMIN_PASSWORD'] ?? ''));
 
-    return ($apiKey === '' || $adminPassword === '');
+    return ($adminPassword === '');
 }
