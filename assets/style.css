@@ -667,6 +667,21 @@ body {
     margin-top: 8px;
 }
 
+.chapter-range-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.chapter-range-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.chapter-range-list,
 .chapter-list {
     display: flex;
     flex-direction: column;
@@ -679,6 +694,7 @@ body {
     overflow-y: auto;
 }
 
+.chapter-range-item,
 .chapter-item {
     display: flex;
     align-items: center;
@@ -693,11 +709,13 @@ body {
     cursor: pointer;
 }
 
+.chapter-range-item:hover,
 .chapter-item:hover {
     border-color: rgba(255, 255, 255, 0.2);
     background: rgba(255, 255, 255, 0.08);
 }
 
+.chapter-range-item.active,
 .chapter-item.active {
     border-color: rgba(59, 130, 246, 0.45);
     background: rgba(59, 130, 246, 0.18);

@@ -108,13 +108,12 @@ if (!file_exists($jsonFile)) {
                 </div>
             </div>
 
-            <div class="setting-row">
-                <div class="setting-label">章节选择</div>
-                <div class="setting-controls chapter-search-controls">
-                    <input type="search" id="chapter-search" placeholder="输入章节号或标题">
-                </div>
-            </div>
             <div class="chapter-picker">
+                <div class="chapter-range-header">
+                    <div id="chapter-range-title" class="chapter-range-title">请选择章节范围</div>
+                    <button class="btn tiny secondary" type="button" id="chapter-range-back" style="display:none;">返回</button>
+                </div>
+                <div id="chapter-range-list" class="chapter-range-list" role="listbox" aria-label="章节范围"></div>
                 <div id="chapter-list" class="chapter-list" role="listbox" aria-label="章节列表"></div>
                 <div id="chapter-list-empty" class="chapter-list-empty">正在加载章节列表…</div>
             </div>
